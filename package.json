@@ -1,0 +1,50 @@
+{
+  "name": "@aistoragedepot/mcp",
+  "version": "0.6.0",
+  "description": "Model Context Protocol server for your AIStorageDepot library â€” exposes your prompts, rules, docs, and skills to MCP-aware AI clients (Claude, Cursor, Cline, â€¦).",
+  "type": "module",
+  "bin": {
+    "mcp": "index.mjs",
+    "aistoragedepot-mcp": "index.mjs"
+  },
+  "files": [
+    "index.mjs",
+    "README.md",
+    "LICENSE",
+    "pull.mjs"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node test-pull.mjs",
+    "test:client": "node test-client.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0"
+  },
+  "keywords": [
+    "mcp",
+    "modelcontextprotocol",
+    "model-context-protocol",
+    "aistoragedepot",
+    "prompts",
+    "ai",
+    "llm",
+    "claude",
+    "cursor"
+  ],
+  "author": "AIStorageDepot",
+  "homepage": "https://www.aistoragedepot.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AIStorageDepot/aistoragedepot-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AIStorageDepot/aistoragedepot-mcp/issues"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}
