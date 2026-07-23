@@ -1,7 +1,7 @@
 {
   "name": "@aistoragedepot/mcp",
-  "version": "0.6.1",
-  "description": "Model Context Protocol server for your AIStorageDepot library â€” exposes your prompts, rules, docs, and skills to MCP-aware AI clients (Claude, Cursor, Cline, â€¦).",
+  "version": "0.6.2",
+  "description": "Model Context Protocol server for your AIStorageDepot library - exposes your prompts, rules, docs, and skills to MCP-aware AI clients (Claude, Cursor, Cline, and more).",
   "type": "module",
   "bin": {
     "mcp": "index.mjs",
