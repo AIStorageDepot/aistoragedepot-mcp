@@ -14,6 +14,21 @@ Your stored content shows up where you actually work:
 - **Tools** → `search_library(query)` and `get_item(id)` let an agent find and fetch
   anything in your library programmatically.
 
+## Try it with no account (sample mode)
+
+`AISD_TOKEN` is **optional**. Run the server with **no token** and it serves a free, read-only
+sample of the **public curated library** — a good way to see AIStorageDepot inside your editor
+before signing up. Add a token later to switch to **your own & team libraries**. Add the server
+with an empty `env` (or omit `AISD_TOKEN`):
+
+```json
+{
+  "mcpServers": {
+    "aisd": { "command": "npx", "args": ["-y", "@aistoragedepot/mcp"] }
+  }
+}
+```
+
 ## Setup
 
 > **👉 Easiest path:** step-by-step instructions for each app (config-file locations and all)
@@ -45,7 +60,7 @@ Your stored content shows up where you actually work:
 
 | Env var | Required | Default | Notes |
 | --- | --- | --- | --- |
-| `AISD_TOKEN` | yes | — | Token from Settings → API tokens. Has full access to your account — keep it secret. |
+| `AISD_TOKEN` | no | — | Token from Settings → API tokens. **No token = anonymous sample mode** (the free public curated library, read-only). **With a token** you get your own & team libraries. Has full access to your account — keep it secret. |
 | `AISD_BASE_URL` | no | `https://www.aistoragedepot.com` | Point at a self-hosted / dev instance if needed. |
 | `AISD_WORKSPACES` | no | — | **Retired.** Your slash menu is now the items you mark **/** in the app (strict opt-in); this variable is ignored. Search and resources still cover every workspace. |
 

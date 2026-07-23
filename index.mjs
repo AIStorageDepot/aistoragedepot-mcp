@@ -42,9 +42,34 @@ if (process.argv[2] === "pull") {
 
 const TOKEN = process.env.AISD_TOKEN;
 
-if (!TOKEN) {
-  console.error("AISD_TOKEN is required. Create one in AIStorageDepot → Settings → API tokens.");
-  process.exit(1);
+// No token → ANONYMOUS "sample mode": a thin JSON-RPC proxy to the hosted /api/mcp endpoint with NO
+// Authorization header, which serves ONLY the free public curated library. With a token, every handler
+// keeps its existing REST behavior against the signed-in user's own libraries — unchanged.
+const ANON = !TOKEN;
+if (ANON) {
+  console.error(
+    "AISD: no AISD_TOKEN set — serving the free public AIStorageDepot curated library (sample mode). Sign in for your own & team library.",
+  );
+}
+
+// ANON transport: forward one JSON-RPC call to the hosted MCP endpoint (no auth header) and return its
+// result, throwing on a JSON-RPC error so the SDK surfaces the message. Used by every handler in ANON
+// mode; never called when a token is present.
+let rpcId = 0;
+async function rpc(method, params = {}) {
+  const res = await fetch(`${BASE_URL}/api/mcp`, {
+    method: "POST",
+    headers: { "content-type": "application/json", accept: "application/json" },
+    body: JSON.stringify({ jsonrpc: "2.0", id: ++rpcId, method, params }),
+  });
+  let data;
+  try {
+    data = await res.json();
+  } catch {
+    throw new Error(`AIStorageDepot /api/mcp → HTTP ${res.status}`);
+  }
+  if (data?.error) throw new Error(data.error.message || `AIStorageDepot MCP error ${data.error.code}`);
+  return data?.result;
 }
 
 async function api(path) {
@@ -247,6 +272,7 @@ async function resolveBody(it) {
 
 // ---- Resources: every item, readable at aisd://item/<id> ----
 server.setRequestHandler(ListResourcesRequestSchema, async () => {
+  if (ANON) return rpc("resources/list");
   const { items, workspaces } = await snapshot();
   const wsNames = new Map(workspaces.map((w) => [w.id, w.name]));
   return {
@@ -260,6 +286,7 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => {
 });
 
 server.setRequestHandler(ReadResourceRequestSchema, async (req) => {
+  if (ANON) return rpc("resources/read", { uri: req.params.uri });
   const { uri } = req.params;
   const id = uri.replace(/^aisd:\/\/item\//, "");
   const { items } = await snapshot();
@@ -270,6 +297,7 @@ server.setRequestHandler(ReadResourceRequestSchema, async (req) => {
 
 // ---- Prompts: prompt-format items, [fields] → arguments ----
 server.setRequestHandler(ListPromptsRequestSchema, async () => {
+  if (ANON) return rpc("prompts/list");
   const prompts = [];
   const snap = await snapshot();
   const wsNames = new Map(snap.workspaces.map((w) => [w.id, w.name]));
@@ -292,6 +320,7 @@ server.setRequestHandler(ListPromptsRequestSchema, async () => {
 });
 
 server.setRequestHandler(GetPromptRequestSchema, async (req) => {
+  if (ANON) return rpc("prompts/get", { name: req.params.name, arguments: req.params.arguments || {} });
   const it = scopedPromptIndex(await snapshot()).get(req.params.name);
   if (!it) throw new Error(`Unknown prompt: ${req.params.name}`);
   const args = req.params.arguments || {};
@@ -303,7 +332,9 @@ server.setRequestHandler(GetPromptRequestSchema, async (req) => {
 });
 
 // ---- Tools: search + fetch ----
-server.setRequestHandler(ListToolsRequestSchema, async () => ({
+server.setRequestHandler(ListToolsRequestSchema, async () => {
+  if (ANON) return rpc("tools/list");
+  return {
   tools: [
     {
       name: "search_library",
@@ -333,10 +364,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
       },
     },
   ],
-}));
+  };
+});
 
 server.setRequestHandler(CallToolRequestSchema, async (req) => {
   const { name, arguments: args } = req.params;
+  if (ANON) return rpc("tools/call", { name, arguments: args || {} });
   try {
     if (name === "search_library") {
       const q = String(args?.query || "").trim();
