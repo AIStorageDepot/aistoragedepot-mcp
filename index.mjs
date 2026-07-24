@@ -48,7 +48,7 @@ const TOKEN = process.env.AISD_TOKEN;
 const ANON = !TOKEN;
 if (ANON) {
   console.error(
-    "AISD: no AISD_TOKEN set — serving the free public AIStorageDepot curated library (sample mode). Sign in for your own & team library.",
+    "AISD: no AISD_TOKEN set — serving the free public AIStorageDepot library sample. Using it means you accept the Terms at https://www.aistoragedepot.com/terms. Sign in for your own & team library.",
   );
 }
 
@@ -255,7 +255,17 @@ function missingRequiredPreamble(placeholders, requiredFields = [], args = {}, d
 // server under another key keep their own prefix; this is the self-reported name.)
 const server = new Server(
   { name: "aisd", version: "0.6.0" },
-  { capabilities: { resources: {}, prompts: {}, tools: {} } },
+  {
+    capabilities: { resources: {}, prompts: {}, tools: {} },
+    // Sample mode (no token): tell the client once, at connect, that using the free public
+    // sample constitutes acceptance of the Terms. Token mode keeps its normal init (no notice).
+    ...(ANON
+      ? {
+          instructions:
+            "Free public AIStorageDepot sample — no account required. Using it means you accept the Terms at https://www.aistoragedepot.com/terms. Create a free account at https://www.aistoragedepot.com for your own & team library.",
+        }
+      : {}),
+  },
 );
 
 // If an item includes @aisd:<slug> references, ask the API to inline them for THIS user (access-
