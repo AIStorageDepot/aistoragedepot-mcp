@@ -2,8 +2,8 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.aistoragedepot-admin/aistoragedepot-mcp",
   "title": "AIStorageDepot",
-  "description": "AIStorageDepot prompt, rules, skills & docs library exposed over MCP (search_library + get_item).",
-  "version": "0.6.4",
+  "description": "Prompt, rules, skills & docs library over MCP. No token = read-only sample of the public library.",
+  "version": "0.6.7",
   "repository": {
     "url": "https://github.com/AIStorageDepot/aistoragedepot-mcp",
     "source": "github"
@@ -14,7 +14,7 @@
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@aistoragedepot/mcp",
-      "version": "0.6.4",
+      "version": "0.6.7",
       "transport": {
         "type": "stdio"
       }
