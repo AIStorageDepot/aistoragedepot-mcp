@@ -1,0 +1,29 @@
+name: CI
+
+# Runs the package's own test suite on every push and pull request. test-pull.mjs is the
+# deterministic one — it exercises the `pull` command against a temp directory and pins the
+# on-disk command layout (commands/aisd, frontmatter, [field] argument-hints, re-sync safety).
+# test-client.mjs is deliberately NOT run here: it spawns a live stdio client and needs a
+# reachable server, so it is a local/manual check rather than a CI gate.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Run tests
+        run: npm test
