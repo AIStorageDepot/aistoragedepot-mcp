@@ -1,6 +1,6 @@
 {
   "name": "@aistoragedepot/mcp",
-  "version": "0.6.6",
+  "version": "0.6.7",
   "mcpName": "io.github.aistoragedepot-admin/aistoragedepot-mcp",
   "description": "Model Context Protocol server for your AIStorageDepot library - exposes your prompts, rules, docs, and skills to MCP-aware AI clients (Claude, Cursor, Cline, and more).",
   "type": "module",

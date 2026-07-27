@@ -349,15 +349,15 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
     {
       name: "search_library",
       description:
-        "Search your AIStorageDepot library (prompts, rules, docs, skills, configs) by keyword across titles, bodies, tags, and categories. Returns matching items with their aisd://item/<id> resource URIs. By default every library you belong to is searched; pass `library` ONLY when the user names a specific one.",
+        "Keyword search over the AIStorageDepot library (prompts, rules, docs, skills, configs, templates). Step 1 of two: search_library finds items, get_item reads them.\n\nReturns a list only — per match: title, item type, source library, and an aisd://item/<id> URI. Bodies are never included; call get_item to read one. Up to 200 matches; no matches returns a plain message, not an error. Where you can read several libraries, the nearest copy ranks first (personal before team/company).\n\nRead-only, no side effects; results are live — always the current saved version. An API token is optional: with one, every library you belong to is searched; without one, a read-only sample of the public prebuilt library. Items you have set inactive are skipped, and the example/welcome libraries are never searched.\n\nUse it whenever you need stored library material and do not already have an id; skip it and call get_item directly when you do. Items marked \"/\" are also offered as MCP prompts (slash commands), so a hit may be one already in your prompt list.\n\nLimits: 120 requests/min per token, 600/min per user (anonymous: 120/min per client IP). Each call draws on a monthly quota (2,500 free, 30,000 on Plus, higher on team plans); past it reads are slowed, never blocked.",
       inputSchema: {
         type: "object",
         properties: {
-          query: { type: "string", description: "Keyword(s) to search for." },
+          query: { type: "string", description: "Matched as one case-insensitive SUBSTRING — not tokenized keywords, and no wildcards, quoting, or boolean operators — against title, body, category name, and tag name. So \"code review\" matches only text containing that contiguous phrase, and a natural-language question usually matches nothing: use one or two distinctive words, and if nothing comes back retry shorter rather than rephrasing. Under 2 characters returns no results without searching." },
           library: {
             type: "string",
             description:
-              'Optional — search only the library whose name contains this text (e.g. "mycompany", "platform"). Omit it unless the user explicitly names a library.',
+              'Case-insensitive substring of a library\'s NAME — not an id, and not its contents (e.g. "acme" matches "Acme Platform"; one value can match several). Omit it: searching every library you can read is the default and the right choice unless the user names one. It only narrows scope, never widens it. Without a token there is only the public sample library and this filter has no effect.',
           },
         },
         required: ["query"],
@@ -366,10 +366,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
     {
       name: "get_item",
       description:
-        "Fetch the full content of one library item by its id or aisd://item/<id> URI (e.g. from a search_library result). The response leads with the item's title, type, version, and which library it came from.",
+        "Fetch one library item's full content by its id or aisd://item/<id> URI. Step 2 of two: search_library returns URIs but no bodies, so this is the only way to read an item's text.\n\nReturns a header line — title, item type, version, source library — then the body. Two notices can sit between them, each closing with a --- rule: a fill-in-template header listing the item's [field] placeholders (marking required fields and any defaults), whose values must be collected from the user before the content is used; and a \"newer version exists\" notice when this copy has fallen behind its source. Relay both rather than silently proceeding. Any @aisd:<slug> references in the body arrive already expanded inline.\n\nRead-only, no side effects; reads are live — always the current saved version. An API token is optional: with one you reach every library you belong to; without one, a read-only sample of the public prebuilt library. An unknown or unreachable id returns an error result, not an empty body.\n\nUse it as soon as you hold an id or URI — from search_library, a resource listing, or the user. It resolves exact ids only and cannot search or list, so use search_library to discover. Items marked \"/\" are also exposed as MCP prompts (slash commands).\n\nLimits: 120 requests/min per token, 600/min per user (anonymous: 120/min per client IP). Each call draws on a monthly quota (2,500 free, 30,000 on Plus, higher on team plans); past it reads are slowed, never blocked.",
       inputSchema: {
         type: "object",
-        properties: { id: { type: "string", description: "The item id, or an aisd://item/<id> URI." } },
+        properties: { id: { type: "string", description: "An item id, or a full aisd://item/<id> URI — the aisd://item/ prefix is stripped for you, so search_library output can be pasted unchanged. Exact match only, one id per call: no titles, slugs, partial ids, wildcards, or comma-separated lists, so fetch N items with N calls. Use only an id returned by search_library, a resource listing, or supplied by the user — ids cannot be derived from titles, and an id outside the libraries you can read resolves as not found." } },
         required: ["id"],
       },
     },
