@@ -17,7 +17,23 @@
       "version": "0.6.7",
       "transport": {
         "type": "stdio"
-      }
+      },
+      "environmentVariables": [
+        {
+          "name": "AISD_TOKEN",
+          "description": "Your AIStorageDepot API token (Settings → API tokens). Leave it out and the server runs in free sample mode, serving a read-only slice of the public library — add it to get your own and your team's libraries.",
+          "isRequired": false,
+          "isSecret": true,
+          "format": "string"
+        },
+        {
+          "name": "AISD_BASE_URL",
+          "description": "Only for the self-hosted edition: the origin of your own AIStorageDepot install, e.g. https://aisd.yourcompany.com. Defaults to the hosted service.",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string"
+        }
+      ]
     }
   ]
 }
